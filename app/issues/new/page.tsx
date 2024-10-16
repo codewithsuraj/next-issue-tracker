@@ -2,7 +2,7 @@
 
 import { Button, Callout, TextField } from "@radix-ui/themes";
 import SimpleMDE from "react-simplemde-editor";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, FieldValues } from "react-hook-form";
 import axios from "axios";
 import "easymde/dist/easymde.min.css";
 import { useRouter } from "next/navigation";
@@ -28,17 +28,15 @@ const NewIssuePage = () => {
   const [error, setError] = useState("");
   const [isSubmitting, setSubmitting] = useState(false);
 
-  const onSubmit = () => {
-    handleSubmit(async (data) => {
-      try {
-        setSubmitting(true);
-        await axios.post("/api/issues", data);
-        router.push("/issues");
-      } catch (error) {
-        setSubmitting(false);
-        setError("An unexpected error occurred");
-      }
-    });
+  const onSubmit = async (data: FieldValues) => {
+    try {
+      setSubmitting(true);
+      await axios.post("/api/issues", data);
+      router.push("/issues");
+    } catch (error) {
+      setSubmitting(false);
+      setError("An unexpected error occurred");
+    }
   };
 
   return (
@@ -48,7 +46,7 @@ const NewIssuePage = () => {
           <Callout.Text>{error}</Callout.Text>
         </Callout.Root>
       )}
-      <form className="space-y-3" onSubmit={onSubmit}>
+      <form className="space-y-3" onSubmit={handleSubmit(onSubmit)}>
         <TextField.Root placeholder="Title" {...register("title")} />
         <ErrorMessage>{errors.title?.message}</ErrorMessage>
         <Controller
