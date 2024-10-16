@@ -22,7 +22,7 @@ type IssueFormData = z.infer<typeof issueSchema>;
 interface Props {
   issue?: Issue;
 }
-const IssueForm = async ({ issue }: Props) => {
+const IssueForm = ({ issue }: Props) => {
   const router = useRouter();
   const {
     register,
@@ -38,11 +38,17 @@ const IssueForm = async ({ issue }: Props) => {
   const onSubmit = async (data: FieldValues) => {
     try {
       setSubmitting(true);
-      await axios.post("/api/issues", data);
+      if (issue) {
+        await axios.patch(`/api/issues/${issue.id}`, data);
+      } else {
+        await axios.post("/api/issues", data);
+      }
       router.push("/issues");
+      router.refresh();
     } catch (error) {
       setSubmitting(false);
       setError("An unexpected error occurred");
+      console.log(error);
     }
   };
 
@@ -70,7 +76,8 @@ const IssueForm = async ({ issue }: Props) => {
         />
         <ErrorMessage>{errors.description?.message}</ErrorMessage>
         <Button disabled={isSubmitting}>
-          Submit New Issue {isSubmitting && <Spinner />}
+          {issue ? "Update issue" : "Submit New Issue"}{" "}
+          {isSubmitting && <Spinner />}
         </Button>
       </form>
     </div>
