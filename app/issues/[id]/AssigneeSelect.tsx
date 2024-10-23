@@ -4,6 +4,7 @@ import { Issue, User } from "@prisma/client";
 import { Select } from "@radix-ui/themes";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
 
 const AssigneeSelect = ({ issue }: { issue: Issue }) => {
   const {
@@ -26,9 +27,13 @@ const AssigneeSelect = ({ issue }: { issue: Issue }) => {
       <Select.Root
         defaultValue={issue.assignedToUserId || "null"}
         onValueChange={(userId) => {
-          axios.patch("/api/issues/" + issue.id, {
-            assignedToUserId: userId === "null" ? null : userId,
-          });
+          axios
+            .patch("/api/issues/" + issue.id, {
+              assignedToUserId: userId === "null" ? null : userId,
+            })
+            .catch(() => {
+              toast.error("Changes could not be applied");
+            });
         }}
       >
         <Select.Trigger placeholder="Assign..." />
@@ -44,6 +49,8 @@ const AssigneeSelect = ({ issue }: { issue: Issue }) => {
           </Select.Group>
         </Select.Content>
       </Select.Root>
+
+      <Toaster></Toaster>
     </>
   );
 };
